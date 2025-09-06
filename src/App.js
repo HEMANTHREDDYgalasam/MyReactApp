@@ -1,23 +1,41 @@
-import logo from './logo.svg';
-import './App.css';
+// src/App.js
+import React, { useState } from 'react';
+import ShortenerForm from './components/ShortenerForm';
+import StatsPage from './components/StatsPage';
 
 function App() {
+  const [shortenedUrls, setShortenedUrls] = useState([]);
+
+  // Receive shortened URLs from ShortenerForm
+  const handleShortenedUrls = (urls) => {
+    setShortenedUrls(urls);
+  };
+
+  // Record a click on a shortened URL
+  const recordClick = (shortcode) => {
+    setShortenedUrls((prevUrls) =>
+      prevUrls.map((url) => {
+        if (url.shortcode === shortcode) {
+          return {
+            ...url,
+            clicks: [
+              ...(url.clicks || []),
+              {
+                timestamp: new Date().toLocaleString(),
+                source: document.referrer || 'Direct',
+              },
+            ],
+          };
+        }
+        return url;
+      })
+    );
+  };
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div style={{ padding: '20px' }}>
+      <ShortenerForm onShorten={handleShortenedUrls} />
+      <StatsPage shortenedUrls={shortenedUrls} onClickShortcode={recordClick} />
     </div>
   );
 }
